@@ -61,7 +61,7 @@ const overlayMaps = {
 var myMap = L.map("map", {
     center: [15.5994, -28.6731],
     zoom: 3,
-    layers: [satellite, earthquake]
+    layers: [satellite, earthquake, tectonicPlates]
 });
 
 // Create a layer control
@@ -114,6 +114,30 @@ d3.json('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_week.geoj
         };
     }
 
+
+    // var legend = L.control({ position: 'bottomright' });
+
+    // legend.onAdd = function (map) {
+
+    //     var div = L.DomUtil.create('div', 'info legend'),
+    //         grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+    //         labels = [];
+
+    //     // loop through our density intervals and generate a label with a colored square for each interval
+    //     for (var i = 0; i < grades.length; i++) {
+    //         div.innerHTML +=
+    //             '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+    //             grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+    //     }
+
+    //     return div;
+    // };
+
+    // legend.addTo(map);
+
+
+
+
     // using pointToLayer option to create a circle Marker
     L.geoJSON(data, {
         pointToLayer: function (feature, latlng) {
@@ -121,7 +145,63 @@ d3.json('https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/1.0_week.geoj
         },
         // get style for the circleMarkers
         style: getStyle,
+
+        // include popup for each feature using onEachFeature option from Leaflet choropleth tutorial
+        onEachFeature: function (features, layer) {
+            layer.bindPopup(
+                "Location: "
+                + features.properties.place
+                + '<br> Time: '
+                + Date(features.properties.time)
+                + '<br> Magnitude: '
+                + features.properties.mag
+                + '<br> Depth: '
+                + features.geometry.coordinates[2]
+            );
+        }
+
+
     }).addTo(myMap);
+
+
+
 
     //   ######### end of access to data ################
 });
+
+
+// get tectonic plates data and add to TP layer
+// url:   https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json
+d3.json('https://raw.githubusercontent.com/fraxen/tectonicplates/master/GeoJSON/PB2002_boundaries.json').then(function (plateData) {
+    // geojson method to create layer
+    L.geoJSON(plateData, {
+        color: "orange",
+        weight: 1.5
+    }).addTo(tectonicPlates);
+});
+
+
+
+
+
+
+
+// var legend = L.control({position: 'bottomright'});
+
+// legend.onAdd = function (map) {
+
+//     var div = L.DomUtil.create('div', 'info legend'),
+//         grades = [0, 10, 20, 50, 100, 200, 500, 1000],
+//         labels = [];
+
+//     // loop through our density intervals and generate a label with a colored square for each interval
+//     for (var i = 0; i < grades.length; i++) {
+//         div.innerHTML +=
+//             '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+//             grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + '<br>' : '+');
+//     }
+
+//     return div;
+// };
+
+// legend.addTo(map);
